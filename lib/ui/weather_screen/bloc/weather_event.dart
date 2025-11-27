@@ -11,9 +11,7 @@ class FetchWeatherDataFromSelectedLocation extends WeatherEvent {
 }
 
 class FetchWeatherFromCurrentLocation extends WeatherEvent {
-  final Location location;
-
-  const FetchWeatherFromCurrentLocation(this.location);
+  const FetchWeatherFromCurrentLocation();
 }
 
 class WeatherDataLoaded extends WeatherEvent {

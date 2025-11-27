@@ -4,7 +4,7 @@ class DioBuilder {
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: 'https://api.openweathermap.org',
-      connectTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 12),
       receiveTimeout: const Duration(seconds: 7),
       sendTimeout: const Duration(seconds: 7),
     ),

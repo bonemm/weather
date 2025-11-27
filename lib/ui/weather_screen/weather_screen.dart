@@ -15,14 +15,26 @@ class WeatherScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: DependenciesScope.of(context).weatherBloc..add(FetchWeatherDataFromSelectedLocation(Location.initial())),
+      value: DependenciesScope.of(context).weatherBloc,
       child: _WeatherWidget(),
     );
   }
 }
 
-class _WeatherWidget extends StatelessWidget {
+class _WeatherWidget extends StatefulWidget {
   const _WeatherWidget();
+
+  @override
+  State<_WeatherWidget> createState() => _WeatherWidgetState();
+}
+
+class _WeatherWidgetState extends State<_WeatherWidget> {
+  @override
+  void initState() {
+    super.initState();
+    // context.read<WeatherBloc>().add(FetchWeatherFromCurrentLocation());
+    context.read<WeatherBloc>().add(FetchWeatherDataFromSelectedLocation(Location.initial()));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +54,14 @@ class _WeatherWidget extends StatelessWidget {
                     feelsLike: state.weatherData.feelsLike,
                     forecast: state.forecast.forecast,
                   ),
-                _ => SizedBox(
-                    height: 300,
-                    width: 300,
-                    child: Icon(
-                      Icons.sunny,
-                      size: 50,
+                _ => Center(
+                    child: SizedBox(
+                      height: 300,
+                      width: 300,
+                      child: Icon(
+                        Icons.sunny,
+                        size: 50,
+                      ),
                     ),
                   ),
               };

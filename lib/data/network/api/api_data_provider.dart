@@ -24,7 +24,6 @@ class ApiService {
     if (apiKey.isEmpty) {
       throw Exception('API_KEY is not set. Use --dart-define=WEATHER_API_KEY=your_key');
     }
-
     var builder = DioBuilder();
     var apiKeyInterceptor = ApiTokenInterceptor(apiKey);
     builder.addIntercepror(apiKeyInterceptor);
