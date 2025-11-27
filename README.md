@@ -1,3 +1,2 @@
-# weather
+Minimalistic weather app build with Flutter.
 
-Minimalistic weather app.
