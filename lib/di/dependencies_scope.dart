@@ -6,7 +6,7 @@ class DependenciesScope extends InheritedWidget {
 
   const DependenciesScope({required super.child, required this.dependencies, super.key});
 
-  static DIContainer of(BuildContext context, {bool listen = true}) {
+  static DIContainer of(BuildContext context, {bool listen = false}) {
     final dependencies = listen
         ? context.dependOnInheritedWidgetOfExactType<DependenciesScope>()?.dependencies
         : context.getInheritedWidgetOfExactType<DependenciesScope>()?.dependencies;

@@ -1,2 +1,4 @@
-Minimalistic weather app build with Flutter.
+## Weather app
+Minimal weather app build with Flutter. Developing in process, not finished...
 
+### Features

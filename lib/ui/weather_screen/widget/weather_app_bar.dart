@@ -40,6 +40,7 @@ class WeatherAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       title: Text('Weather'),
       centerTitle: true,
+      actions: [IconButton(onPressed: () {}, icon: Icon(Icons.settings))],
     );
   }
 
