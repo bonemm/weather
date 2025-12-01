@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather/ui/new_place/search_place_screen.dart';
+import 'package:weather/ui/settings/settings_screen.dart';
 import 'package:weather/ui/weather_screen/bloc/weather_bloc.dart';
 
 class WeatherAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -31,6 +32,10 @@ class WeatherAppBar extends StatelessWidget implements PreferredSizeWidget {
     }
   }
 
+  void _toSettingsScreen(BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -40,7 +45,12 @@ class WeatherAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       title: Text('Weather'),
       centerTitle: true,
-      actions: [IconButton(onPressed: () {}, icon: Icon(Icons.settings))],
+      actions: [
+        IconButton(
+          onPressed: () => _toSettingsScreen(context),
+          icon: Icon(Icons.settings),
+        )
+      ],
     );
   }
 
