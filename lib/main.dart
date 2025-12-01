@@ -21,10 +21,18 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return DependenciesScope(
       dependencies: dependencies,
-      child: const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: WeatherScreen(),
-      ),
+      child: Builder(builder: (context) {
+        var themeService = DependenciesScope.of(context).themeService;
+        return AnimatedBuilder(
+            animation: themeService,
+            builder: (context, _) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: WeatherScreen(),
+                theme: themeService.themeData,
+              );
+            });
+      }),
     );
   }
 }

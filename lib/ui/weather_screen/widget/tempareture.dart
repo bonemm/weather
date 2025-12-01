@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather/di/dependencies_scope.dart';
 
 class TemperatureSpace extends StatelessWidget {
   const TemperatureSpace({super.key, required this.temp, required this.feelsLike});
@@ -37,6 +38,7 @@ class DayTemperature extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var themeService = DependenciesScope.of(context).themeService;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -48,6 +50,7 @@ class DayTemperature extends StatelessWidget {
             Image.asset(
               'assets/sunny.png',
               width: 60,
+              color: themeService.isDarkMode ? Colors.white : Colors.black,
             ),
             Text(
               'Sunny',

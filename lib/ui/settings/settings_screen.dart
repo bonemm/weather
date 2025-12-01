@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:weather/di/dependencies_scope.dart';
+import 'package:weather/ui/theme/theme_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -41,7 +43,14 @@ class DarkModeCard extends StatefulWidget {
 }
 
 class _DarkModeCardState extends State<DarkModeCard> {
-  bool _isDarkMode = false;
+  late final ThemeService themeService;
+
+  @override
+  void initState() {
+    super.initState();
+    themeService = DependenciesScope.of(context).themeService;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -52,6 +61,7 @@ class _DarkModeCardState extends State<DarkModeCard> {
             'assets/nightmode.png',
             height: 40,
             width: 40,
+            color: themeService.isDarkMode ? Colors.white : Colors.black,
           ),
           SizedBox(width: 15),
           Text(
@@ -60,10 +70,8 @@ class _DarkModeCardState extends State<DarkModeCard> {
           ),
           Spacer(),
           Switch(
-            value: _isDarkMode,
-            onChanged: (val) => setState(() {
-              _isDarkMode = !_isDarkMode;
-            }),
+            value: themeService.isDarkMode,
+            onChanged: (val) => themeService.toggleTheme(),
             activeThumbColor: Colors.grey.shade500,
           )
         ],
@@ -91,6 +99,7 @@ class _LanguadeCardState extends State<LanguadeCard> {
             'assets/book.png',
             height: 40,
             width: 40,
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
           ),
           SizedBox(width: 15),
           Text(
@@ -113,7 +122,7 @@ class _LanguadeCardState extends State<LanguadeCard> {
               selectedBorderColor: Colors.black12,
               selectedColor: Colors.white,
               fillColor: Colors.grey.shade500,
-              color: Colors.black,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.grey : Colors.black,
               isSelected: _selectedLang,
               children: langs,
             ),

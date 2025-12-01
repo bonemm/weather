@@ -1,6 +1,8 @@
 import 'package:weather/data/storage/search_repository.dart';
 import 'package:weather/data/storage/weather_repository.dart';
 import 'package:weather/ui/new_place/bloc/search_place_bloc.dart';
+import 'package:weather/ui/settings/swettings_repoitory.dart';
+import 'package:weather/ui/theme/theme_service.dart';
 import 'package:weather/ui/weather_screen/bloc/weather_bloc.dart';
 
 class DIContainer {
@@ -8,11 +10,13 @@ class DIContainer {
   late final SearchRepository searchRepository;
   late final WeatherBloc weatherBloc;
   late final SearchPlaceBloc searchPlaceBloc;
+  late final ThemeService themeService;
 
   DIContainer() {
     weatherRepository = WeatherRepository();
     searchRepository = SearchRepository();
     weatherBloc = WeatherBloc(weatherRepository: weatherRepository);
     searchPlaceBloc = SearchPlaceBloc(searchRepository: searchRepository);
+    themeService = ThemeService(SettingsRepoitory());
   }
 }

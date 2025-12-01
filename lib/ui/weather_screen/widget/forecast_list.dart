@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:weather/data/entities/weather_entity.dart';
+import 'package:weather/di/dependencies_scope.dart';
 import 'package:weather/utils/weather_icon_mapper.dart';
 
 class ForecastList extends StatelessWidget {
@@ -43,6 +44,7 @@ class WeekDayWeatherCard extends StatelessWidget {
   final String iconCode;
   @override
   Widget build(BuildContext context) {
+    var themeService = DependenciesScope.of(context).themeService;
     return SizedBox(
       height: 30,
       child: Row(
@@ -52,7 +54,7 @@ class WeekDayWeatherCard extends StatelessWidget {
           Icon(
             getIconData(iconCode),
             size: 18,
-            color: Colors.black87,
+            color: themeService.isDarkMode ? Colors.white : Colors.black87,
           ),
           SizedBox(width: 15),
           Text('$dayTemp°/$nightTemp°'),
