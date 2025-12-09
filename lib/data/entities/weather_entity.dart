@@ -18,20 +18,21 @@ class WeatherEntity {
   final String countryCode;
   final String temperature;
   final String feelsLike;
+  final String weatherText;
 
-  const WeatherEntity({
-    required this.temperature,
-    required this.feelsLike,
-    required this.locationName,
-    required this.countryCode,
-  });
+  const WeatherEntity(
+      {required this.temperature,
+      required this.feelsLike,
+      required this.locationName,
+      required this.countryCode,
+      required this.weatherText});
 
   factory WeatherEntity.fromWeatherDto(WeatherResponseDto weatherResponseDto) => WeatherEntity(
-        temperature: weatherResponseDto.weather.temp.round().toString(),
-        feelsLike: weatherResponseDto.weather.feelsLike.round().toString(),
-        countryCode: weatherResponseDto.sys.country,
-        locationName: weatherResponseDto.name,
-      );
+      temperature: weatherResponseDto.weather.temp.round().toString(),
+      feelsLike: weatherResponseDto.weather.feelsLike.round().toString(),
+      countryCode: weatherResponseDto.sys.country,
+      locationName: weatherResponseDto.name,
+      weatherText: weatherResponseDto.weatherList.first.main);
 }
 
 class ForecstEntity {

@@ -113,14 +113,14 @@ class _SearchPlacesWidgetState extends State<_SearchPlacesWidget> {
                 icon: Icon(
                   Icons.where_to_vote_rounded,
                   size: 30,
-                  color: Color(0xFF00908A),
+                  color: Color(0xFF051230),
                 ),
                 label: Text(
                   'Select location',
-                  style: TextStyle(color: Color(0xFF00978D), fontSize: 16),
+                  style: TextStyle(color: Color(0xFF051230), fontSize: 16),
                 ),
                 elevation: 1,
-                backgroundColor: Color(0xFFA5C8D1)),
+                backgroundColor: Color(0xFFb6bfc1)),
           ),
         ),
       ),
@@ -137,13 +137,14 @@ class _SearchHistoryLocations extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ListView.builder(
+        ListView.separated(
           shrinkWrap: true,
           itemCount: history.length,
-          padding: EdgeInsets.symmetric(horizontal: 12),
+          padding: EdgeInsets.symmetric(horizontal: 16),
           itemBuilder: (context, index) {
             return _HistoryLocationItem(historyItem: history[index]);
           },
+          separatorBuilder: (context, _) => SizedBox(height: 8),
         ),
       ],
     );
@@ -157,54 +158,51 @@ class _HistoryLocationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
       child: Dismissible(
         key: ValueKey<String>(historyItem.place),
         background: const _DismissibleBackground(isLeft: true),
         secondaryBackground: const _DismissibleBackground(isLeft: false),
         onDismissed: (_) => context.read<SearchPlaceBloc>().add(SearchPlaceRemoveLocation(historyItem)),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: 70),
-          child: ColoredBox(
-            color: Color(0xFFA5C8D1),
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          historyItem.place,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          historyItem.date,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey,
-                              ),
-                        ),
-                      ],
-                    ),
+        child: ColoredBox(
+          color: Colors.grey.shade300,
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        historyItem.place,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        historyItem.date,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.black,
+                            ),
+                      ),
+                    ],
                   ),
-                  Icon(
-                    getIconData(historyItem.iconCode),
-                    size: 24,
+                ),
+                Icon(
+                  getIconData(historyItem.iconCode),
+                  size: 24,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  '${historyItem.temperature}°',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
                   ),
-                  SizedBox(width: 8),
-                  Text(
-                    '${historyItem.temperature}°',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -221,8 +219,8 @@ class _DismissibleBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.red.shade300,
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(color: Colors.red.shade300),
+      padding: EdgeInsets.symmetric(horizontal: 10),
       alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
       child: const Icon(Icons.delete_outline, color: Colors.white, size: 32),
     );
@@ -236,17 +234,20 @@ class SuggestionsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Color(0xFFA5C8D1),
-      child: ListView.builder(
-        shrinkWrap: true,
-        padding: EdgeInsets.zero,
-        itemBuilder: (context, index) => ListTile(
-          onTap: () => onLocationSelected(locations[index]),
-          leading: Icon(Icons.place_outlined),
-          title: Text(locations[index].location),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: Color(0xFFA5C8D1), borderRadius: BorderRadius.circular(12)),
+        child: ListView.builder(
+          shrinkWrap: true,
+          padding: EdgeInsets.zero,
+          itemBuilder: (context, index) => ListTile(
+            onTap: () => onLocationSelected(locations[index]),
+            leading: Icon(Icons.place_outlined),
+            title: Text(locations[index].location),
+          ),
+          itemCount: locations.length,
         ),
-        itemCount: locations.length,
       ),
     );
   }

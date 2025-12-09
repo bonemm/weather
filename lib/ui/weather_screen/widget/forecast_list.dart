@@ -10,21 +10,21 @@ class ForecastList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: 18),
-        itemBuilder: (_, index) => WeekDayWeatherCard(
-          dayOfWeek: forecast[index].dayOfWeek,
-          dayTemp: forecast[index].dayTemp,
-          nightTemp: forecast[index].nightTemp,
-          iconCode: forecast[index].iconCode,
-        ),
-        separatorBuilder: (_, index) => Divider(
-          color: Colors.blueGrey,
-          thickness: 1.0,
-        ),
-        itemCount: forecast.length,
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 18),
+      itemBuilder: (_, index) => WeekDayWeatherCard(
+        dayOfWeek: forecast[index].dayOfWeek,
+        dayTemp: forecast[index].dayTemp,
+        nightTemp: forecast[index].nightTemp,
+        iconCode: forecast[index].iconCode,
       ),
+      separatorBuilder: (_, index) => Divider(
+        color: Colors.blueGrey,
+        thickness: 1.0,
+      ),
+      itemCount: forecast.length,
     );
   }
 }

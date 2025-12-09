@@ -10,11 +10,6 @@ class AppThemes {
       foregroundColor: Colors.black,
     ),
     scaffoldBackgroundColor: Colors.grey[50],
-    colorScheme: ColorScheme.light(
-      primary: Colors.blue,
-      secondary: Colors.orange,
-      surface: Colors.white,
-    ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(
         fontSize: 32,
@@ -45,10 +40,6 @@ class AppThemes {
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.grey[900],
       foregroundColor: Colors.white,
-    ),
-    colorScheme: const ColorScheme.dark(
-      primary: Colors.blueAccent,
-      secondary: Colors.orangeAccent,
     ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(

@@ -22,7 +22,7 @@ class SettingsScreen extends StatelessWidget {
             endIndent: 24,
             thickness: 0.5,
           ),
-          LanguadeCard(),
+          LanguageCard(),
           Divider(
             height: 2,
             indent: 24,
@@ -80,14 +80,14 @@ class _DarkModeCardState extends State<DarkModeCard> {
   }
 }
 
-class LanguadeCard extends StatefulWidget {
-  const LanguadeCard({super.key});
+class LanguageCard extends StatefulWidget {
+  const LanguageCard({super.key});
 
   @override
-  State<LanguadeCard> createState() => _LanguadeCardState();
+  State<LanguageCard> createState() => _LanguageCardState();
 }
 
-class _LanguadeCardState extends State<LanguadeCard> {
+class _LanguageCardState extends State<LanguageCard> {
   final List<bool> _selectedLang = <bool>[true, false];
   @override
   Widget build(BuildContext context) {
@@ -130,7 +130,6 @@ class _LanguadeCardState extends State<LanguadeCard> {
         ],
       ),
     );
-    ;
   }
 }
 

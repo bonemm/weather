@@ -7,7 +7,7 @@ import 'package:weather/data/network/api/dio_builder.dart';
 import 'package:weather/data/network/api/interceptors.dart';
 
 class ApiService {
-  static const _apiKey = String.fromEnvironment('WEATHER_API_KEY');
+  static const _apiKey = "b4a82d8c1777a9686ee7cb26ce7e3b0f"; //String.fromEnvironment('WEATHER_API_KEY');
 
   final String _mode = 'json';
   late final String _language;
@@ -15,7 +15,7 @@ class ApiService {
   late final Dio _dio;
 
   ApiService() {
-    _language = 'en';
+    _language = 'ru';
     _units = 'metric';
     _dio = _getDioClient(_apiKey);
   }

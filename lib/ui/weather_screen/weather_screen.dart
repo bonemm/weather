@@ -40,86 +40,80 @@ class _WeatherWidgetState extends State<_WeatherWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WeatherAppBar(),
-      body: Column(
-        spacing: 16,
-        children: [
-          BlocBuilder<WeatherBloc, WeatherState>(
-            builder: (context, state) {
-              return switch (state) {
-                WeatherLoadingState() => LoadingWidget(),
-                WeatherSuccessLoadedState() => WeatherInfo(
-                    name: state.weatherData.locationName,
-                    countryCode: state.weatherData.countryCode,
-                    temp: state.weatherData.temperature,
-                    feelsLike: state.weatherData.feelsLike,
-                    forecast: state.forecast.forecast,
+      body: BlocBuilder<WeatherBloc, WeatherState>(
+        builder: (context, state) {
+          return switch (state) {
+            WeatherLoadingState() => LoadingWidget(),
+            WeatherSuccessLoadedState() => WeatherInfo(
+                name: state.weatherData.locationName,
+                countryCode: state.weatherData.countryCode,
+                temp: state.weatherData.temperature,
+                feelsLike: state.weatherData.feelsLike,
+                forecast: state.forecast.forecast,
+                weatherText: state.weatherData.weatherText,
+              ),
+            _ => Center(
+                child: SizedBox(
+                  height: 300,
+                  width: 300,
+                  child: Icon(
+                    Icons.sunny,
+                    size: 50,
                   ),
-                _ => Center(
-                    child: SizedBox(
-                      height: 300,
-                      width: 300,
-                      child: Icon(
-                        Icons.sunny,
-                        size: 50,
-                      ),
-                    ),
-                  ),
-              };
-            },
-          ),
-        ],
+                ),
+              ),
+          };
+        },
       ),
     );
   }
 }
 
 class WeatherInfo extends StatelessWidget {
-  const WeatherInfo({
-    super.key,
-    required this.name,
-    required this.countryCode,
-    required this.temp,
-    required this.feelsLike,
-    required this.forecast,
-  });
+  const WeatherInfo(
+      {super.key,
+      required this.name,
+      required this.countryCode,
+      required this.temp,
+      required this.feelsLike,
+      required this.forecast,
+      required this.weatherText});
 
   final String name;
   final String countryCode;
+  final String weatherText;
   final String temp;
   final String feelsLike;
   final List<ForecastEntityItem> forecast;
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<WeatherBloc, WeatherState>(
-      builder: (context, state) {
-        return Expanded(
-          child: Column(
-            children: [
-              PlaceName(name: name, countryCode: countryCode),
-              SizedBox(height: 16),
-              TemperatureSpace(
-                temp: temp,
-                feelsLike: feelsLike,
-              ),
-              SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    'Four-day forecast',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ),
-              ),
-              ForecastList(
-                forecast: forecast,
-              ),
-            ],
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          PlaceName(name: name, countryCode: countryCode),
+          TemperatureSpace(
+            temp: temp,
+            feelsLike: feelsLike,
+            weatherText: weatherText,
           ),
-        );
-      },
+          SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                'Four-day forecast',
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+          ),
+          ForecastList(
+            forecast: forecast,
+          ),
+        ],
+      ),
     );
   }
 }
