@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:weather/ui/settings/swettings_repoitory.dart';
+import 'package:weather/ui/settings/settings_repoitory.dart';
 import 'themes.dart';
 
 enum ThemeType { light, dark }
