@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather/data/entities/weather_entity.dart';
-import 'package:weather/data/geolocation/models/location.dart';
 import 'package:weather/di/dependencies_scope.dart';
 import 'package:weather/ui/weather_screen/bloc/weather_bloc.dart';
 import 'package:weather/ui/weather_screen/widget/forecast_list.dart';
@@ -32,8 +31,8 @@ class _WeatherWidgetState extends State<_WeatherWidget> {
   @override
   void initState() {
     super.initState();
-    // context.read<WeatherBloc>().add(FetchWeatherFromCurrentLocation());
-    context.read<WeatherBloc>().add(FetchWeatherDataFromSelectedLocation(Location.initial()));
+    context.read<WeatherBloc>().add(FetchWeatherFromCurrentLocation());
+    //context.read<WeatherBloc>().add(FetchWeatherDataFromSelectedLocation(Location.initial()));
   }
 
   @override

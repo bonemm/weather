@@ -158,6 +158,7 @@ class _HistoryLocationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var themeService = DependenciesScope.of(context).themeService;
     return ClipRRect(
       borderRadius: BorderRadius.circular(6),
       child: Dismissible(
@@ -166,7 +167,7 @@ class _HistoryLocationItem extends StatelessWidget {
         secondaryBackground: const _DismissibleBackground(isLeft: false),
         onDismissed: (_) => context.read<SearchPlaceBloc>().add(SearchPlaceRemoveLocation(historyItem)),
         child: ColoredBox(
-          color: Colors.grey.shade300,
+          color: themeService.isDarkMode ? Colors.black : Colors.grey.shade300,
           child: Padding(
             padding: EdgeInsets.all(12),
             child: Row(
@@ -183,9 +184,6 @@ class _HistoryLocationItem extends StatelessWidget {
                       SizedBox(height: 2),
                       Text(
                         historyItem.date,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.black,
-                            ),
                       ),
                     ],
                   ),
@@ -234,10 +232,14 @@ class SuggestionsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var themeService = DependenciesScope.of(context).themeService;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: DecoratedBox(
-        decoration: BoxDecoration(color: Color(0xFFA5C8D1), borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: themeService.isDarkMode ? Colors.blueGrey.shade900 : Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: ListView.builder(
           shrinkWrap: true,
           padding: EdgeInsets.zero,
@@ -269,11 +271,11 @@ class SearchTextField extends StatelessWidget {
         focusNode: _tfn,
         onChanged: (text) => context.read<SearchPlaceBloc>().add(SearchPlaceNameTextEdited(text)),
         decoration: InputDecoration(
-          prefixIcon: Icon(Icons.search, color: Colors.black45),
+          prefixIcon: Icon(Icons.search, color: Theme.of(context).focusColor),
           hintText: 'search a city...',
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.black, width: 1),
+            borderSide: BorderSide(color: Theme.of(context).focusColor, width: 1),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),

@@ -15,15 +15,9 @@ class TemperatureSpace extends StatelessWidget {
       height: 280,
       child: Column(
         children: [
-<<<<<<< HEAD
           Expanded(flex: 3, child: DayTemperature(temperature: temp, weatherText: weatherText)),
           Divider(color: Colors.blueGrey),
           Expanded(flex: 2, child: FeelLikeTemperature(flTemp: feelsLike)),
-=======
-          Expanded(flex: 2, child: DayTemperature(temperature: temp, weatherText: weatherText)),
-          Divider(color: Colors.blueGrey),
-          Expanded(flex: 1, child: FeelLikeTemperature(flTemp: feelsLike)),
->>>>>>> dfdfef61a9bac7cb6168f3fed402d574c2d363f2
         ],
       ),
     );
