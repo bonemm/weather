@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:weather/di/dependencies_scope.dart';
+import 'package:weather/l10n/app_localizations.dart';
+import 'package:weather/utils/weather_icon_mapper.dart';
 
 class TemperatureSpace extends StatelessWidget {
-  const TemperatureSpace({super.key, required this.temp, required this.feelsLike, required this.weatherText});
+  const TemperatureSpace({
+    super.key,
+    required this.temp,
+    required this.feelsLike,
+    required this.weatherCode,
+    required this.isDay,
+  });
 
   final String temp;
   final String feelsLike;
-  final String weatherText;
+  final int weatherCode;
+  final bool isDay;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +24,7 @@ class TemperatureSpace extends StatelessWidget {
       height: 280,
       child: Column(
         children: [
-          Expanded(flex: 3, child: DayTemperature(temperature: temp, weatherText: weatherText)),
+          Expanded(flex: 3, child: DayTemperature(temperature: temp, weatherCode: weatherCode, isDay: isDay)),
           Divider(color: Colors.blueGrey),
           Expanded(flex: 2, child: FeelLikeTemperature(flTemp: feelsLike)),
         ],
@@ -25,10 +34,11 @@ class TemperatureSpace extends StatelessWidget {
 }
 
 class DayTemperature extends StatelessWidget {
-  const DayTemperature({super.key, required this.temperature, required this.weatherText});
+  const DayTemperature({super.key, required this.temperature, required this.weatherCode, required this.isDay});
 
   final String temperature;
-  final String weatherText;
+  final int weatherCode;
+  final bool isDay;
 
   @override
   Widget build(BuildContext context) {
@@ -37,22 +47,52 @@ class DayTemperature extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Temp(temp: temperature),
-        Column(
-          spacing: 8,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/sunny.png',
-              width: 60,
-              color: themeService.isDarkMode ? Colors.white : Colors.black,
-            ),
-            Text(
-              weatherText,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-            ),
-          ],
-        )
+        Expanded(
+          child: Column(
+            spacing: 8,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                iconForWeatherCode(weatherCode, isDay: isDay),
+                size: 50,
+                color: themeService.isDarkMode ? Colors.white : Colors.black,
+              ),
+              _ConditionText(
+                text: descriptionForWeatherCode(weatherCode, AppLocalizations.of(context)),
+              ),
+            ],
+          ),
+        ),
       ],
+    );
+  }
+}
+
+/// Weather condition label that wraps to two lines and only scales down when
+/// the text still overflows that height (handles longer locales like Russian).
+class _ConditionText extends StatelessWidget {
+  const _ConditionText({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return FittedBox(
+          fit: BoxFit.scaleDown,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -102,7 +142,7 @@ class FeelLikeTemperature extends StatelessWidget {
               ),
             ],
           ),
-          Text('feels like'),
+          Text(AppLocalizations.of(context).feelsLike),
         ],
       ),
     );

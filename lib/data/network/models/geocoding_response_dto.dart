@@ -1,23 +1,30 @@
+/// One result from Open-Meteo geocoding (https://geocoding-api.open-meteo.com).
+///
+/// `admin1` is the primary administrative region (state/region); it is absent
+/// for some places, so it is nullable.
 class GeocodingLocationDto {
   final String name;
-  final String? state;
+  final String? admin1;
   final String country;
-  final num latitude;
-  final num longitude;
+  final String countryCode;
+  final double latitude;
+  final double longitude;
 
   const GeocodingLocationDto({
-    required this.latitude,
-    required this.longitude,
     required this.name,
     required this.country,
-    this.state,
+    required this.countryCode,
+    required this.latitude,
+    required this.longitude,
+    this.admin1,
   });
 
   factory GeocodingLocationDto.fromJson(final Map<String, dynamic> json) => GeocodingLocationDto(
-        latitude: json['lat'] as num,
-        longitude: json['lon'] as num,
-        name: json['name'],
-        state: json['state'],
-        country: json['country'],
+        name: json['name'] as String,
+        admin1: json['admin1'] as String?,
+        country: json['country'] as String? ?? '',
+        countryCode: json['country_code'] as String? ?? '',
+        latitude: (json['latitude'] as num).toDouble(),
+        longitude: (json['longitude'] as num).toDouble(),
       );
 }

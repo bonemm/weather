@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather/data/entities/search_history_item_entity.dart';
 import 'package:weather/data/geolocation/models/location.dart';
 import 'package:weather/di/dependencies_scope.dart';
+import 'package:weather/l10n/app_localizations.dart';
 import 'package:weather/ui/new_place/bloc/search_place_bloc.dart';
 import 'package:weather/ui/new_place/bloc/search_place_event.dart';
 import 'package:weather/ui/new_place/bloc/search_place_state.dart';
@@ -72,7 +73,7 @@ class _SearchPlacesWidgetState extends State<_SearchPlacesWidget> {
             },
             icon: Icon(Icons.arrow_back),
           ),
-          title: Text('Locations'),
+          title: Text(AppLocalizations.of(context).locationsTitle),
           centerTitle: true,
         ),
         body: Column(
@@ -116,7 +117,7 @@ class _SearchPlacesWidgetState extends State<_SearchPlacesWidget> {
                   color: Color(0xFF051230),
                 ),
                 label: Text(
-                  'Select location',
+                  AppLocalizations.of(context).selectLocation,
                   style: TextStyle(color: Color(0xFF051230), fontSize: 16),
                 ),
                 elevation: 1,
@@ -189,7 +190,7 @@ class _HistoryLocationItem extends StatelessWidget {
                   ),
                 ),
                 Icon(
-                  getIconData(historyItem.iconCode),
+                  iconForWeatherCode(historyItem.weatherCode, isDay: historyItem.isDay),
                   size: 24,
                 ),
                 SizedBox(width: 8),
@@ -272,7 +273,7 @@ class SearchTextField extends StatelessWidget {
         onChanged: (text) => context.read<SearchPlaceBloc>().add(SearchPlaceNameTextEdited(text)),
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.search, color: Theme.of(context).focusColor),
-          hintText: 'search a city...',
+          hintText: AppLocalizations.of(context).searchCityHint,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Theme.of(context).focusColor, width: 1),

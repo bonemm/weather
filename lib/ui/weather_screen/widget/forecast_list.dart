@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:weather/data/entities/weather_entity.dart';
 import 'package:weather/di/dependencies_scope.dart';
 import 'package:weather/utils/weather_icon_mapper.dart';
@@ -15,10 +16,10 @@ class ForecastList extends StatelessWidget {
       physics: NeverScrollableScrollPhysics(),
       padding: EdgeInsets.symmetric(horizontal: 18),
       itemBuilder: (_, index) => WeekDayWeatherCard(
-        dayOfWeek: forecast[index].dayOfWeek,
+        date: forecast[index].date,
         dayTemp: forecast[index].dayTemp,
         nightTemp: forecast[index].nightTemp,
-        iconCode: forecast[index].iconCode,
+        weatherCode: forecast[index].weatherCode,
       ),
       separatorBuilder: (_, index) => Divider(
         color: Colors.blueGrey,
@@ -32,19 +33,21 @@ class ForecastList extends StatelessWidget {
 class WeekDayWeatherCard extends StatelessWidget {
   const WeekDayWeatherCard({
     super.key,
-    required this.dayOfWeek,
+    required this.date,
     required this.dayTemp,
     required this.nightTemp,
-    required this.iconCode,
+    required this.weatherCode,
   });
 
-  final String dayOfWeek;
+  final DateTime date;
   final String dayTemp;
   final String nightTemp;
-  final String iconCode;
+  final int weatherCode;
   @override
   Widget build(BuildContext context) {
     var themeService = DependenciesScope.of(context).themeService;
+    // Full weekday name localized to the active locale (e.g. Monday / Понедельник).
+    final dayOfWeek = DateFormat.EEEE(Localizations.localeOf(context).toString()).format(date);
     return SizedBox(
       height: 30,
       child: Row(
@@ -52,7 +55,8 @@ class WeekDayWeatherCard extends StatelessWidget {
           Text(dayOfWeek),
           Spacer(),
           Icon(
-            getIconData(iconCode),
+            // Daily forecast has no day/night split; always show the day icon.
+            iconForWeatherCode(weatherCode, isDay: true),
             size: 18,
             color: themeService.isDarkMode ? Colors.white : Colors.black87,
           ),

@@ -92,4 +92,10 @@ class SearchPlaceBloc extends Bloc<SearchPlaceEvent, SearchPlaceState> {
       log('$e \n $st');
     }
   }
+
+  @override
+  Future<void> close() {
+    _searchDebounceTimer?.cancel();
+    return super.close();
+  }
 }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather/data/entities/weather_entity.dart';
 import 'package:weather/di/dependencies_scope.dart';
+import 'package:weather/l10n/app_localizations.dart';
 import 'package:weather/ui/weather_screen/bloc/weather_bloc.dart';
 import 'package:weather/ui/weather_screen/widget/forecast_list.dart';
-import 'package:weather/ui/weather_screen/widget/place_name.dart';
 import 'package:weather/ui/weather_screen/widget/tempareture.dart';
 import 'package:weather/ui/weather_screen/widget/weather_app_bar.dart';
 
@@ -35,34 +35,62 @@ class _WeatherWidgetState extends State<_WeatherWidget> {
     //context.read<WeatherBloc>().add(FetchWeatherDataFromSelectedLocation(Location.initial()));
   }
 
+  Future<void> _onRefresh() {
+    final bloc = context.read<WeatherBloc>();
+    bloc.add(const RefreshWeather());
+    // Keep the indicator spinning until the refresh settles into a terminal state.
+    return bloc.stream.firstWhere((s) => s is WeatherSuccessLoadedState || s is WeatherErrorState);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WeatherAppBar(),
-      body: BlocBuilder<WeatherBloc, WeatherState>(
-        builder: (context, state) {
-          return switch (state) {
-            WeatherLoadingState() => LoadingWidget(),
-            WeatherSuccessLoadedState() => WeatherInfo(
-                name: state.weatherData.locationName,
-                countryCode: state.weatherData.countryCode,
-                temp: state.weatherData.temperature,
-                feelsLike: state.weatherData.feelsLike,
-                forecast: state.forecast.forecast,
-                weatherText: state.weatherData.weatherText,
-              ),
-            _ => Center(
-                child: SizedBox(
-                  height: 300,
-                  width: 300,
-                  child: Icon(
-                    Icons.sunny,
-                    size: 50,
-                  ),
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: BlocBuilder<WeatherBloc, WeatherState>(
+          builder: (context, state) {
+            final content = switch (state) {
+              WeatherLoadingState() => const LoadingWidget(),
+              WeatherSuccessLoadedState() => WeatherInfo(
+                  temp: state.weatherData.temperature,
+                  feelsLike: state.weatherData.feelsLike,
+                  forecast: state.forecast.forecast,
+                  weatherCode: state.weatherData.weatherCode,
+                  isDay: state.weatherData.isDay,
                 ),
-              ),
-          };
-        },
+              _ => const _FallbackContent(),
+            };
+            // Make the body always scrollable and fill the viewport so the
+            // pull-to-refresh gesture works even on the loading/error screens.
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: content,
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _FallbackContent extends StatelessWidget {
+  const _FallbackContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: SizedBox(
+        height: 300,
+        width: 300,
+        child: Icon(Icons.sunny, size: 50),
       ),
     );
   }
@@ -71,31 +99,30 @@ class _WeatherWidgetState extends State<_WeatherWidget> {
 class WeatherInfo extends StatelessWidget {
   const WeatherInfo(
       {super.key,
-      required this.name,
-      required this.countryCode,
       required this.temp,
       required this.feelsLike,
       required this.forecast,
-      required this.weatherText});
+      required this.weatherCode,
+      required this.isDay});
 
-  final String name;
-  final String countryCode;
-  final String weatherText;
+  final int weatherCode;
+  final bool isDay;
   final String temp;
   final String feelsLike;
   final List<ForecastEntityItem> forecast;
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PlaceName(name: name, countryCode: countryCode),
+          SizedBox(height: 8),
           TemperatureSpace(
             temp: temp,
             feelsLike: feelsLike,
-            weatherText: weatherText,
+            weatherCode: weatherCode,
+            isDay: isDay,
           ),
           SizedBox(height: 16),
           Padding(
@@ -103,7 +130,7 @@ class WeatherInfo extends StatelessWidget {
             child: Align(
               alignment: Alignment.topLeft,
               child: Text(
-                'Four-day forecast',
+                AppLocalizations.of(context).tenDayForecast,
                 style: TextStyle(fontSize: 20),
               ),
             ),
@@ -122,7 +149,8 @@ class LoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Align(
+      alignment: Alignment.topCenter,
       child: Column(
         spacing: 16,
         children: [

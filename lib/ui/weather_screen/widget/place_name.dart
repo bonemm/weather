@@ -8,10 +8,14 @@ class PlaceName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // No resolved place (e.g. reverse geocoding failed): show nothing.
+    if (name.isEmpty) return const SizedBox.shrink();
+
+    final label = countryCode.isEmpty ? name : '$name, $countryCode';
     return SizedBox(
       height: 30,
       child: Text(
-        '$name, $countryCode',
+        label,
         style: TextStyle(fontSize: 20),
       ),
     );

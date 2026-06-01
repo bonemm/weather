@@ -31,7 +31,9 @@ class WeatherSearchHistory {
       entries: (json['history'] as List<dynamic>)
           .map((e) => SearchHistoryEntry.fromJson(e as Map<String, dynamic>))
           .toList(),
-      timestamp: DateTime(2025, 9, 7));
+      // Falls back to epoch so anything without a valid timestamp is treated as
+      // stale and refreshed once.
+      timestamp: DateTime.tryParse(json['date'] as String? ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0));
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'history': entries,

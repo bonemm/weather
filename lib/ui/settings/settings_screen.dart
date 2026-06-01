@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:weather/di/dependencies_scope.dart';
+import 'package:weather/l10n/app_localizations.dart';
 import 'package:weather/ui/theme/theme_service.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -9,7 +10,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: Text(AppLocalizations.of(context).settingsTitle),
       ),
       body: Column(
         spacing: 10,
@@ -43,11 +44,11 @@ class DarkModeCard extends StatefulWidget {
 }
 
 class _DarkModeCardState extends State<DarkModeCard> {
-  late final ThemeService themeService;
+  late ThemeService themeService;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     themeService = DependenciesScope.of(context).themeService;
   }
 
@@ -55,42 +56,48 @@ class _DarkModeCardState extends State<DarkModeCard> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: Row(
-        children: [
-          Image.asset(
-            'assets/nightmode.png',
-            height: 40,
-            width: 40,
-            color: themeService.isDarkMode ? Colors.white : Colors.black,
-          ),
-          SizedBox(width: 15),
-          Text(
-            'Dark mode',
-            style: TextStyle(fontSize: 18),
-          ),
-          Spacer(),
-          Switch(
-            value: themeService.isDarkMode,
-            onChanged: (val) => themeService.toggleTheme(),
-            activeThumbColor: Colors.grey.shade500,
-          )
-        ],
+      child: ListenableBuilder(
+        listenable: themeService,
+        builder: (context, _) {
+          return Row(
+            children: [
+              Image.asset(
+                'assets/nightmode.png',
+                height: 40,
+                width: 40,
+                color: themeService.isDarkMode ? Colors.white : Colors.black,
+              ),
+              SizedBox(width: 15),
+              Text(
+                AppLocalizations.of(context).darkMode,
+                style: TextStyle(fontSize: 18),
+              ),
+              Spacer(),
+              Switch(
+                value: themeService.isDarkMode,
+                onChanged: (val) => themeService.toggleTheme(),
+                activeThumbColor: Colors.grey.shade500,
+              )
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-class LanguageCard extends StatefulWidget {
+class LanguageCard extends StatelessWidget {
   const LanguageCard({super.key});
 
-  @override
-  State<LanguageCard> createState() => _LanguageCardState();
-}
+  // Toggle order; index maps to a language code below.
+  static const _languageCodes = <String>['en', 'ru'];
+  static const _languageLabels = <Widget>[Text('EN'), Text('RU')];
 
-class _LanguageCardState extends State<LanguageCard> {
-  final List<bool> _selectedLang = <bool>[true, false];
   @override
   Widget build(BuildContext context) {
+    final localeService = DependenciesScope.of(context).localeService;
+    final selected = _languageCodes.map((code) => code == localeService.languageCode).toList();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Row(
@@ -103,7 +110,7 @@ class _LanguageCardState extends State<LanguageCard> {
           ),
           SizedBox(width: 15),
           Text(
-            'Language',
+            AppLocalizations.of(context).language,
             style: TextStyle(fontSize: 18),
           ),
           Spacer(),
@@ -111,20 +118,14 @@ class _LanguageCardState extends State<LanguageCard> {
             height: 40,
             child: ToggleButtons(
               direction: Axis.horizontal,
-              onPressed: (int index) {
-                setState(() {
-                  for (int i = 0; i < _selectedLang.length; i++) {
-                    _selectedLang[i] = i == index;
-                  }
-                });
-              },
+              onPressed: (int index) => localeService.setLanguage(_languageCodes[index]),
               borderRadius: const BorderRadius.all(Radius.circular(16)),
               selectedBorderColor: Colors.black12,
               selectedColor: Colors.white,
               fillColor: Colors.grey.shade500,
               color: Theme.of(context).brightness == Brightness.dark ? Colors.grey : Colors.black,
-              isSelected: _selectedLang,
-              children: langs,
+              isSelected: selected,
+              children: _languageLabels,
             ),
           ),
         ],
@@ -132,5 +133,3 @@ class _LanguageCardState extends State<LanguageCard> {
     );
   }
 }
-
-const List<Widget> langs = <Widget>[Text('ru'), Text('eng')];

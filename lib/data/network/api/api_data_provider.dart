@@ -1,90 +1,105 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:weather/data/network/models/forecast_response_dto.dart';
 import 'package:weather/data/network/models/geocoding_response_dto.dart';
-import 'package:weather/data/network/models/weather_response_dto.dart';
+import 'package:weather/data/network/models/reverse_geocoding_dto.dart';
 import 'package:weather/data/geolocation/models/location.dart';
 import 'package:weather/data/network/api/dio_builder.dart';
-import 'package:weather/data/network/api/interceptors.dart';
 
+/// Client for the Open-Meteo APIs (https://open-meteo.com/en/docs).
+///
+/// Open-Meteo is keyless and free. Forecast and geocoding live on different
+/// hosts, so each request uses an absolute URL.
 class ApiService {
-  static const _apiKey = String.fromEnvironment('WEATHER_API_KEY');
+  static const _forecastUrl = 'https://api.open-meteo.com/v1/forecast';
+  static const _geocodingUrl = 'https://geocoding-api.open-meteo.com/v1/search';
 
-  final String _mode = 'json';
-  late final String _language;
-  late final String _units;
+  // Open-Meteo geocoding is forward-only, so reverse lookups (coords -> place
+  // name) use BigDataCloud's free, keyless endpoint.
+  static const _reverseGeocodingUrl = 'https://api.bigdatacloud.net/data/reverse-geocode-client';
+
+  static const _forecastDays = 10;
+
+  final String _temperatureUnit = 'celsius';
   late final Dio _dio;
 
   ApiService() {
-    _language = 'en';
-    _units = 'metric';
-    _dio = _getDioClient(_apiKey);
-  }
-
-  Dio _getDioClient(String apiKey) {
-    if (apiKey.isEmpty) {
-      throw Exception('API_KEY is not set. Use --dart-define=WEATHER_API_KEY=your_key');
-    }
-    var builder = DioBuilder();
-    var apiKeyInterceptor = ApiTokenInterceptor(apiKey);
-    builder.addIntercepror(apiKeyInterceptor);
-
-    return builder.dio;
-  }
-
-  Future<WeatherResponseDto?> getWeather(Location location) async {
-    final response = await _dio.get(
-      '/data/2.5/weather',
-      queryParameters: {
-        'lat': location.latitude,
-        'lon': location.longitude,
-        'mode': _mode,
-        'lang': _language,
-        'units': _units,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      return WeatherResponseDto.fromJson(response.data);
-    } else {
-      return null;
-    }
+    _dio = DioBuilder().dio;
   }
 
   Future<ForecastResponseDto?> getForecast(Location location) async {
-    final response = await _dio.get(
-      '/data/2.5/forecast',
-      queryParameters: {
-        'lat': location.latitude,
-        'lon': location.longitude,
-        'mode': _mode,
-        'lang': _language,
-        'units': _units,
-        'cnt': 40,
-      },
-    );
+    try {
+      final response = await _dio.get(
+        _forecastUrl,
+        queryParameters: {
+          'latitude': location.latitude,
+          'longitude': location.longitude,
+          'current': 'temperature_2m,apparent_temperature,weather_code,is_day',
+          'daily': 'weather_code,temperature_2m_max,temperature_2m_min',
+          'temperature_unit': _temperatureUnit,
+          'timezone': 'auto',
+          'forecast_days': _forecastDays,
+        },
+      );
 
-    if (response.statusCode == 200) {
-      return ForecastResponseDto.fromJson(response.data);
-    } else {
-      return null;
+      if (response.statusCode == 200) {
+        log(jsonEncode(response.data), name: 'ApiService.getForecast');
+        return ForecastResponseDto.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        return null;
+      }
+    } catch (e, st) {
+      log('getForecast failed', name: 'ApiService', error: e, stackTrace: st);
+      rethrow;
     }
   }
 
-  Future<List<GeocodingLocationDto>?> getLocationsByPlaceName(String placeName) async {
-    final response = await _dio.get(
-      '/geo/1.0/direct',
-      queryParameters: {
-        'q': placeName,
-        'appid': _apiKey,
-        'limit': 5,
-      },
-    );
-    final responseList = response.data as Iterable;
+  Future<List<GeocodingLocationDto>?> getLocationsByPlaceName(String placeName, {String language = 'en'}) async {
+    try {
+      final response = await _dio.get(
+        _geocodingUrl,
+        queryParameters: {
+          'name': placeName,
+          'count': 5,
+          'language': language,
+          'format': 'json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      return responseList.map((e) => GeocodingLocationDto.fromJson(e)).toList();
-    } else {
-      return null;
+      if (response.statusCode == 200) {
+        final results = response.data['results'] as List<dynamic>?;
+        if (results == null) return [];
+        return results.map((e) => GeocodingLocationDto.fromJson(e as Map<String, dynamic>)).toList();
+      } else {
+        return null;
+      }
+    } catch (e, st) {
+      log('getLocationsByPlaceName failed for "$placeName"', name: 'ApiService', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  Future<ReverseGeocodingDto?> reverseGeocode(double latitude, double longitude, {String language = 'en'}) async {
+    try {
+      final response = await _dio.get(
+        _reverseGeocodingUrl,
+        queryParameters: {
+          'latitude': latitude,
+          'longitude': longitude,
+          'localityLanguage': language,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return ReverseGeocodingDto.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        return null;
+      }
+    } catch (e, st) {
+      log('reverseGeocode failed for ($latitude, $longitude)', name: 'ApiService', error: e, stackTrace: st);
+      rethrow;
     }
   }
 }

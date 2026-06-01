@@ -1,5 +1,5 @@
 import 'package:weather/data/geolocation/models/location.dart';
-import 'package:weather/data/network/models/weather_response_dto.dart';
+import 'package:weather/data/network/models/forecast_response_dto.dart';
 import 'package:weather/utils/functions.dart';
 
 class SearchHistoryEntry {
@@ -8,36 +8,44 @@ class SearchHistoryEntry {
   final String place;
   final String date;
   final int temperature;
-  final String iconCode;
+  final int weatherCode;
+  final bool isDay;
 
-  Location get location => Location(latitude: latitude, longitude: longitude, location: '');
+  Location get location => Location(latitude: latitude, longitude: longitude, location: place);
 
-  SearchHistoryEntry(
-      {required this.longitude,
-      required this.latitude,
-      required this.place,
-      required this.date,
-      required this.temperature,
-      required this.iconCode});
+  SearchHistoryEntry({
+    required this.longitude,
+    required this.latitude,
+    required this.place,
+    required this.date,
+    required this.temperature,
+    required this.weatherCode,
+    required this.isDay,
+  });
 
-  factory SearchHistoryEntry.fromWatherResponseDto(WeatherResponseDto weatherResponseDto) {
+  /// Built from a fresh Open-Meteo forecast for [location]; the response has no
+  /// place name, so it comes from the location the user picked.
+  factory SearchHistoryEntry.fromForecast(CurrentWeatherDto current, Location location) {
     return SearchHistoryEntry(
-        longitude: weatherResponseDto.coords.longitude,
-        latitude: weatherResponseDto.coords.latitude,
-        place: weatherResponseDto.name,
-        date: formatUnixTime(weatherResponseDto.dt + weatherResponseDto.timezone),
-        temperature: weatherResponseDto.weather.temp.round(),
-        iconCode: weatherResponseDto.weatherList.first.icon);
+      longitude: location.longitude,
+      latitude: location.latitude,
+      place: location.location,
+      date: formatDateTime(DateTime.now()),
+      temperature: current.temperature.round(),
+      weatherCode: current.weatherCode,
+      isDay: current.isDay,
+    );
   }
 
   factory SearchHistoryEntry.fromJson(Map<String, dynamic> json) {
     return SearchHistoryEntry(
-      longitude: json['longitude'],
-      latitude: json['latitude'],
-      place: json['location'],
-      date: json['date'] ?? '',
-      temperature: json['temperature'],
-      iconCode: json['icon'],
+      longitude: (json['longitude'] as num).toDouble(),
+      latitude: (json['latitude'] as num).toDouble(),
+      place: json['location'] as String,
+      date: json['date'] as String? ?? '',
+      temperature: (json['temperature'] as num).toInt(),
+      weatherCode: (json['weather_code'] as num).toInt(),
+      isDay: json['is_day'] as bool? ?? true,
     );
   }
 
@@ -47,19 +55,22 @@ class SearchHistoryEntry {
         'location': place,
         'date': date,
         'temperature': temperature,
-        'icon': iconCode.toString(),
+        'weather_code': weatherCode,
+        'is_day': isDay,
       };
 
+  // Identity is the saved location (lat/lon/place); temperature and date are
+  // just the latest snapshot, so they are intentionally excluded. This lets a
+  // refreshed entry still match its previous version for dedupe/removal.
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is SearchHistoryEntry &&
         latitude == other.latitude &&
         longitude == other.longitude &&
-        place == other.place &&
-        temperature == other.temperature;
+        place == other.place;
   }
 
   @override
-  int get hashCode => Object.hash(latitude, longitude, place, date, temperature);
+  int get hashCode => Object.hash(latitude, longitude, place);
 }

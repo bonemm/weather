@@ -32,21 +32,25 @@ class Location {
       );
 
   factory Location.fromGeocodingResponse(GeocodingLocationDto geocodingResp) {
-    String location = '${geocodingResp.name}, ${geocodingResp.country}';
-    if (geocodingResp.country == 'US') {
-      location += ', ${geocodingResp.state}';
-    }
+    final admin1 = geocodingResp.admin1;
+    // "City, Region, Country" — include the region (admin1) when present, but
+    // skip it if it's blank or just repeats the city name (e.g. Moscow/Moscow).
+    final parts = <String>[
+      geocodingResp.name,
+      if (admin1 != null && admin1.isNotEmpty && admin1 != geocodingResp.name) admin1,
+      geocodingResp.country,
+    ];
     return Location(
-      latitude: geocodingResp.latitude.toDouble(),
-      longitude: geocodingResp.longitude.toDouble(),
-      location: location,
+      latitude: geocodingResp.latitude,
+      longitude: geocodingResp.longitude,
+      location: parts.join(', '),
     );
   }
 
-  Map<String, dynamic> toJson(Location geolocation) => <String, dynamic>{
-        'longitude': geolocation.longitude,
-        'latitude': geolocation.latitude,
-        'location': geolocation.location,
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'longitude': longitude,
+        'latitude': latitude,
+        'location': location,
       };
 
   Location copyWith({

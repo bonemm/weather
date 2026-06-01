@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:weather/di/dependencies_scope.dart';
 import 'package:weather/di/di_container.dart';
+import 'package:weather/l10n/app_localizations.dart';
 import 'package:weather/ui/weather_screen/weather_screen.dart';
 
 void main() {
@@ -22,16 +23,21 @@ class _MainAppState extends State<MainApp> {
     return DependenciesScope(
       dependencies: dependencies,
       child: Builder(builder: (context) {
-        var themeService = DependenciesScope.of(context).themeService;
-        return AnimatedBuilder(
-            animation: themeService,
-            builder: (context, _) {
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                home: WeatherScreen(),
-                theme: themeService.themeData,
-              );
-            });
+        final themeService = DependenciesScope.of(context).themeService;
+        final localeService = DependenciesScope.of(context).localeService;
+        return ListenableBuilder(
+          listenable: Listenable.merge([themeService, localeService]),
+          builder: (context, _) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: WeatherScreen(),
+              theme: themeService.themeData,
+              locale: localeService.locale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+            );
+          },
+        );
       }),
     );
   }

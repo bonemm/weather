@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weather/l10n/app_localizations.dart';
 import 'package:weather/ui/new_place/search_place_screen.dart';
 import 'package:weather/ui/settings/settings_screen.dart';
 import 'package:weather/ui/weather_screen/bloc/weather_bloc.dart';
@@ -43,7 +44,23 @@ class WeatherAppBar extends StatelessWidget implements PreferredSizeWidget {
         onPressed: () => _addNewLocationMenu(context),
         icon: Icon(Icons.menu),
       ),
-      title: Text('Weather'),
+      // Show the current place as the title; fall back to the app name while
+      // loading, on error, or when no place could be resolved.
+      title: BlocBuilder<WeatherBloc, WeatherState>(
+        builder: (context, state) {
+          final title = switch (state) {
+            WeatherSuccessLoadedState(:final weatherData) when weatherData.locationName.isNotEmpty =>
+              weatherData.countryCode.isEmpty
+                  ? weatherData.locationName
+                  : '${weatherData.locationName}, ${weatherData.countryCode}',
+            _ => AppLocalizations.of(context).appTitle,
+          };
+          return Text(
+            title,
+            style: TextStyle(fontSize: 18),
+          );
+        },
+      ),
       centerTitle: true,
       actions: [
         IconButton(
@@ -55,5 +72,5 @@ class WeatherAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size(double.infinity, 60);
+  Size get preferredSize => Size.fromHeight(60);
 }

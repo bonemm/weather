@@ -6,7 +6,10 @@ abstract interface class IStoredDataProvider {
 }
 
 class StoredDataProvider implements IStoredDataProvider {
-  static const _favoritesInfoKey = "favorites_with_weather_key";
+  // Bumped from "favorites_with_weather_key" when migrating to Open-Meteo:
+  // the stored entry shape changed (weather_code/is_day instead of an OWM icon
+  // string), so old data is intentionally dropped rather than migrated.
+  static const _favoritesInfoKey = "favorites_with_weather_v2_key";
 
   @override
   Future<String?> getFavoriteList() => _getItem(_favoritesInfoKey);
