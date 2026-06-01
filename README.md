@@ -14,7 +14,3 @@ Weather data by [Open-Meteo](https://open-meteo.com) (free, no API key required)
 - Light and dark themes, with the choice persisted
 - English and Russian localization, with the choice persisted
 - Weather icons mapped from WMO weather codes
-
-## Demonstration
-
-![Demo showing the app's main interface and user flow](demo/demo.gif)

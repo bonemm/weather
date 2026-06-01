@@ -1,66 +1,52 @@
 import 'package:flutter/material.dart';
 
 class AppThemes {
-  static final ThemeData lightTheme = ThemeData(
-    brightness: Brightness.light,
-    primaryColor: Colors.blue,
-    primarySwatch: Colors.blue,
-    appBarTheme: AppBarTheme(
-      backgroundColor: Colors.grey[50],
-      foregroundColor: Colors.black,
-    ),
-    scaffoldBackgroundColor: Colors.grey[50],
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: Colors.black87,
-      ),
-      bodyLarge: TextStyle(
-        fontSize: 16,
-        color: Colors.black87,
-      ),
-    ),
-    iconTheme: const IconThemeData(color: Colors.black87),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    ),
+  AppThemes._();
+
+  static const Color _lightSeed = Color(0xFFB0BEC5);
+  static const Color _darkSeed = Color(0xFF1A237E);
+
+  static final ThemeData lightTheme = _build(
+    ColorScheme.fromSeed(seedColor: _lightSeed, brightness: Brightness.light),
   );
 
-  static final ThemeData darkTheme = ThemeData(
-    brightness: Brightness.dark,
-    primaryColor: Colors.blueAccent,
-    scaffoldBackgroundColor: Colors.grey[900],
-    appBarTheme: AppBarTheme(
-      backgroundColor: Colors.grey[900],
-      foregroundColor: Colors.white,
-    ),
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
+  static final ThemeData darkTheme = _build(
+    ColorScheme.fromSeed(seedColor: _darkSeed, brightness: Brightness.dark),
+  );
+
+  static ThemeData _build(ColorScheme scheme) {
+    final onBackground = scheme.onSurface;
+
+    final textTheme = TextTheme(
+      displayLarge: TextStyle(fontSize: 100, fontWeight: FontWeight.w200, color: onBackground),
+      displayMedium: TextStyle(fontSize: 56, fontWeight: FontWeight.w200, color: onBackground),
+      headlineMedium: TextStyle(fontSize: 20, color: onBackground),
+      titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: onBackground),
+      titleMedium: TextStyle(fontSize: 18, color: onBackground),
+      bodyLarge: TextStyle(fontSize: 16, color: onBackground),
+      bodyMedium: TextStyle(fontSize: 14, color: scheme.onSurfaceVariant),
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: scheme,
+      scaffoldBackgroundColor: scheme.surface,
+      appBarTheme: AppBarTheme(
+        backgroundColor: scheme.surface,
+        foregroundColor: onBackground,
       ),
-      bodyLarge: TextStyle(
-        fontSize: 16,
-        color: Colors.white70,
-      ),
-    ),
-    iconTheme: const IconThemeData(color: Colors.white70),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+      textTheme: textTheme,
+      iconTheme: IconThemeData(color: onBackground),
+      dividerTheme: DividerThemeData(color: scheme.outlineVariant, thickness: 1),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

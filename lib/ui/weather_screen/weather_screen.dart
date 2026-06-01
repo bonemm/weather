@@ -50,8 +50,7 @@ class _WeatherWidgetState extends State<_WeatherWidget> {
         onRefresh: _onRefresh,
         child: BlocBuilder<WeatherBloc, WeatherState>(
           builder: (context, state) {
-            final content = switch (state) {
-              WeatherLoadingState() => const LoadingWidget(),
+            return switch (state) {
               WeatherSuccessLoadedState() => WeatherInfo(
                   temp: state.weatherData.temperature,
                   feelsLike: state.weatherData.feelsLike,
@@ -59,24 +58,38 @@ class _WeatherWidgetState extends State<_WeatherWidget> {
                   weatherCode: state.weatherData.weatherCode,
                   isDay: state.weatherData.isDay,
                 ),
-              _ => const _FallbackContent(),
+              // Loading / error / initial: keep a simple scrollable filler so
+              // pull-to-refresh still works.
+              _ => _ScrollableFiller(
+                  child: state is WeatherLoadingState ? const LoadingWidget() : const _FallbackContent(),
+                ),
             };
-            // Make the body always scrollable and fill the viewport so the
-            // pull-to-refresh gesture works even on the loading/error screens.
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                    child: content,
-                  ),
-                );
-              },
-            );
           },
         ),
       ),
+    );
+  }
+}
+
+/// Makes a short child fill the viewport and stay scrollable, so the
+/// pull-to-refresh gesture works on the loading/error screens.
+class _ScrollableFiller extends StatelessWidget {
+  const _ScrollableFiller({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }
@@ -111,35 +124,62 @@ class WeatherInfo extends StatelessWidget {
   final String feelsLike;
   final List<ForecastEntityItem> forecast;
 
+  // Expanded/collapsed heights for the collapsing current-weather header.
+  static const double _expandedHeight = 320;
+  static const double _collapsedHeight = 132;
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(height: 8),
-          TemperatureSpace(
-            temp: temp,
-            feelsLike: feelsLike,
-            weatherCode: weatherCode,
-            isDay: isDay,
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverAppBar(
+          pinned: true,
+          automaticallyImplyLeading: false,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          surfaceTintColor: Colors.transparent,
+          expandedHeight: _expandedHeight,
+          collapsedHeight: _collapsedHeight,
+          flexibleSpace: LayoutBuilder(
+            builder: (context, constraints) {
+              // Collapse progress from the current header height: 0 expanded -> 1 collapsed.
+              final maxH = _expandedHeight + MediaQuery.of(context).padding.top;
+              final minH = _collapsedHeight + MediaQuery.of(context).padding.top;
+              final t = ((maxH - constraints.maxHeight) / (maxH - minH)).clamp(0.0, 1.0);
+              return FlexibleSpaceBar(
+                background: SafeArea(
+                  bottom: false,
+                  child: Center(
+                    child: TemperatureSpace(
+                      temp: temp,
+                      feelsLike: feelsLike,
+                      weatherCode: weatherCode,
+                      isDay: isDay,
+                      t: t,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-          SizedBox(height: 16),
-          Padding(
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Align(
               alignment: Alignment.topLeft,
               child: Text(
                 AppLocalizations.of(context).tenDayForecast,
-                style: TextStyle(fontSize: 20),
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
           ),
-          ForecastList(
-            forecast: forecast,
-          ),
-        ],
-      ),
+        ),
+        SliverToBoxAdapter(
+          child: ForecastList(forecast: forecast),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+      ],
     );
   }
 }

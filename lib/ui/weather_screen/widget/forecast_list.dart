@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:weather/data/entities/weather_entity.dart';
-import 'package:weather/di/dependencies_scope.dart';
 import 'package:weather/utils/weather_icon_mapper.dart';
 
 class ForecastList extends StatelessWidget {
@@ -11,21 +10,25 @@ class ForecastList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.symmetric(horizontal: 18),
-      itemBuilder: (_, index) => WeekDayWeatherCard(
-        date: forecast[index].date,
-        dayTemp: forecast[index].dayTemp,
-        nightTemp: forecast[index].nightTemp,
-        weatherCode: forecast[index].weatherCode,
-      ),
-      separatorBuilder: (_, index) => Divider(
-        color: Colors.blueGrey,
-        thickness: 1.0,
-      ),
-      itemCount: forecast.length,
+    return Column(
+      children: [
+        ListView.separated(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: 18),
+          itemBuilder: (_, index) => WeekDayWeatherCard(
+            date: forecast[index].date,
+            dayTemp: forecast[index].dayTemp,
+            nightTemp: forecast[index].nightTemp,
+            weatherCode: forecast[index].weatherCode,
+          ),
+          separatorBuilder: (_, index) => const Divider(),
+          itemCount: forecast.length,
+        ),
+        SizedBox(
+          height: 200,
+        )
+      ],
     );
   }
 }
@@ -45,23 +48,21 @@ class WeekDayWeatherCard extends StatelessWidget {
   final int weatherCode;
   @override
   Widget build(BuildContext context) {
-    var themeService = DependenciesScope.of(context).themeService;
-    // Full weekday name localized to the active locale (e.g. Monday / Понедельник).
+    final textStyle = Theme.of(context).textTheme.bodyLarge;
     final dayOfWeek = DateFormat.EEEE(Localizations.localeOf(context).toString()).format(date);
     return SizedBox(
       height: 30,
       child: Row(
         children: [
-          Text(dayOfWeek),
+          Text(dayOfWeek, style: textStyle),
           Spacer(),
           Icon(
             // Daily forecast has no day/night split; always show the day icon.
             iconForWeatherCode(weatherCode, isDay: true),
             size: 18,
-            color: themeService.isDarkMode ? Colors.white : Colors.black87,
           ),
           SizedBox(width: 15),
-          Text('$dayTemp°/$nightTemp°'),
+          Text('$dayTemp°/$nightTemp°', style: textStyle),
         ],
       ),
     );

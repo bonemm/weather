@@ -44,8 +44,6 @@ class WeatherAppBar extends StatelessWidget implements PreferredSizeWidget {
         onPressed: () => _addNewLocationMenu(context),
         icon: Icon(Icons.menu),
       ),
-      // Show the current place as the title; fall back to the app name while
-      // loading, on error, or when no place could be resolved.
       title: BlocBuilder<WeatherBloc, WeatherState>(
         builder: (context, state) {
           final title = switch (state) {
@@ -57,7 +55,7 @@ class WeatherAppBar extends StatelessWidget implements PreferredSizeWidget {
           };
           return Text(
             title,
-            style: TextStyle(fontSize: 18),
+            style: Theme.of(context).textTheme.titleMedium,
           );
         },
       ),

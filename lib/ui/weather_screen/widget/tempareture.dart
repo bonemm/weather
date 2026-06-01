@@ -1,8 +1,18 @@
+import 'dart:math' show pi;
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
-import 'package:weather/di/dependencies_scope.dart';
 import 'package:weather/l10n/app_localizations.dart';
 import 'package:weather/utils/weather_icon_mapper.dart';
 
+/// Current-weather block that morphs as the screen scrolls.
+///
+/// [t] is the collapse progress (0 = expanded, 1 = collapsed). The same
+/// elements are animated by [t] rather than swapped:
+///  - the divider rotates 0deg -> 90deg and shortens (long horizontal -> short
+///    vertical);
+///  - "feels like" travels diagonally from below-center to center-right;
+///  - the temperature slides from center toward the left to make room.
 class TemperatureSpace extends StatelessWidget {
   const TemperatureSpace({
     super.key,
@@ -10,59 +20,92 @@ class TemperatureSpace extends StatelessWidget {
     required this.feelsLike,
     required this.weatherCode,
     required this.isDay,
+    this.t = 0,
   });
 
   final String temp;
   final String feelsLike;
   final int weatherCode;
   final bool isDay;
+  final double t;
 
   @override
   Widget build(BuildContext context) {
+    final p = t.clamp(0.0, 1.0);
+
     return SizedBox(
-      width: 280,
-      height: 280,
-      child: Column(
+      width: 300,
+      height: lerpDouble(280, 120, p),
+      child: Stack(
         children: [
-          Expanded(flex: 3, child: DayTemperature(temperature: temp, weatherCode: weatherCode, isDay: isDay)),
-          Divider(color: Colors.blueGrey),
-          Expanded(flex: 2, child: FeelLikeTemperature(flTemp: feelsLike)),
+          // Temperature + icon/label: top-center when expanded, just slides
+          // left along the top edge as it collapses (no downward motion).
+          Align(
+            alignment: Alignment.lerp(Alignment.topCenter, Alignment.topLeft, p)!,
+            child: _DayTemperature(temperature: temp, weatherCode: weatherCode, isDay: isDay, t: p),
+          ),
+
+          // Divider: horizontal across the middle when expanded, rotates the
+          // other way (counter-clockwise) to a short vertical bar up on the
+          // right when collapsed.
+          Align(
+            alignment: Alignment.lerp(Alignment.center, const Alignment(0.35, -0.55), p)!,
+            child: Transform.rotate(
+              angle: -p * pi / 2,
+              child: SizedBox(
+                width: lerpDouble(240, 60, p),
+                child: const Divider(height: 1),
+              ),
+            ),
+          ),
+
+          // "Feels like": below-center when expanded, travels diagonally up to
+          // the top-right, on the same line as the temperature.
+          Align(
+            alignment: Alignment.lerp(Alignment.bottomCenter, const Alignment(1.0, -0.55), p)!,
+            child: _FeelsLike(flTemp: feelsLike, t: p),
+          ),
         ],
       ),
     );
   }
 }
 
-class DayTemperature extends StatelessWidget {
-  const DayTemperature({super.key, required this.temperature, required this.weatherCode, required this.isDay});
+/// Big temperature value + weather icon and condition label. Sizes shrink with [t].
+class _DayTemperature extends StatelessWidget {
+  const _DayTemperature({
+    required this.temperature,
+    required this.weatherCode,
+    required this.isDay,
+    required this.t,
+  });
 
   final String temperature;
   final int weatherCode;
   final bool isDay;
+  final double t;
 
   @override
   Widget build(BuildContext context) {
-    var themeService = DependenciesScope.of(context).themeService;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Temp(temp: temperature),
-        Expanded(
-          child: Column(
-            spacing: 8,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                iconForWeatherCode(weatherCode, isDay: isDay),
-                size: 50,
-                color: themeService.isDarkMode ? Colors.white : Colors.black,
-              ),
-              _ConditionText(
-                text: descriptionForWeatherCode(weatherCode, AppLocalizations.of(context)),
-              ),
-            ],
-          ),
+        _Temp(temp: temperature, t: t),
+        const SizedBox(width: 4),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              iconForWeatherCode(weatherCode, isDay: isDay),
+              size: lerpDouble(50, 30, t),
+            ),
+            SizedBox(height: lerpDouble(8, 2, t)),
+            _ConditionText(
+              text: descriptionForWeatherCode(weatherCode, AppLocalizations.of(context)),
+              fontSize: lerpDouble(20, 13, t)!,
+            ),
+          ],
         ),
       ],
     );
@@ -72,79 +115,78 @@ class DayTemperature extends StatelessWidget {
 /// Weather condition label that wraps to two lines and only scales down when
 /// the text still overflows that height (handles longer locales like Russian).
 class _ConditionText extends StatelessWidget {
-  const _ConditionText({required this.text});
+  const _ConditionText({required this.text, required this.fontSize});
 
   final String text;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return FittedBox(
-          fit: BoxFit.scaleDown,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: constraints.maxWidth),
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-            ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 130),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 130),
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: fontSize),
+            textAlign: TextAlign.center,
+            maxLines: 2,
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
 
-class Temp extends StatelessWidget {
-  const Temp({super.key, required this.temp});
+class _Temp extends StatelessWidget {
+  const _Temp({required this.temp, required this.t});
+
   final String temp;
+  final double t;
+
   @override
   Widget build(BuildContext context) {
+    final base = Theme.of(context).textTheme.displayLarge;
     return Row(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           temp,
-          style: TextStyle(fontSize: 100, fontWeight: FontWeight.w200),
+          style: base?.copyWith(fontSize: lerpDouble(100, 56, t)),
         ),
         Text(
           '°',
-          style: TextStyle(fontSize: 70, fontWeight: FontWeight.w200),
+          style: base?.copyWith(fontSize: lerpDouble(70, 38, t)),
         ),
       ],
     );
   }
 }
 
-class FeelLikeTemperature extends StatelessWidget {
-  const FeelLikeTemperature({
-    super.key,
-    required this.flTemp,
-  });
+class _FeelsLike extends StatelessWidget {
+  const _FeelsLike({required this.flTemp, required this.t});
 
   final String flTemp;
+  final double t;
 
   @override
   Widget build(BuildContext context) {
-    return FittedBox(
-      fit: BoxFit.fill,
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '$flTemp°',
-                style: TextStyle(fontSize: 60, fontWeight: FontWeight.w200),
-              ),
-            ],
-          ),
-          Text(AppLocalizations.of(context).feelsLike),
-        ],
-      ),
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '$flTemp°',
+          style: textTheme.displayLarge?.copyWith(fontSize: lerpDouble(60, 30, t)),
+        ),
+        Text(
+          AppLocalizations.of(context).feelsLike,
+          style: textTheme.bodyMedium?.copyWith(fontSize: lerpDouble(14, 11, t)),
+        ),
+      ],
     );
   }
 }
