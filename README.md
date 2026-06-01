@@ -14,3 +14,10 @@ Weather data by [Open-Meteo](https://open-meteo.com) (free, no API key required)
 - Light and dark themes, with the choice persisted
 - English and Russian localization, with the choice persisted
 - Weather icons mapped from WMO weather codes
+
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/light.png" alt="Light theme" width="45%" />
+  <img src="screenshots/dark.png" alt="Dark theme" width="45%" />
+</p>
